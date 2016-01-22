@@ -56,3 +56,9 @@ After you have installed everything required by *discord.js*, you can install th
 `npm install discord-music-bot`
 
 If you're using Linux, just run the above command and everything should work fine.
+
+###2. Setting up Discord account
+
+You will need a Discord account to be used as the music bot. You can use an existing one or create a new one for this purpose. If you decide to create a new account to serve as the bot, you will need to register it with an email and a password.
+
+In any case, the account you decide to use **must already be a member of the server** you'll use the bot in. If it isn't, just get an invitation and manually join the server.
