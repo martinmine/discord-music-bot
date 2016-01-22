@@ -11,7 +11,7 @@ It requires very little and simple configuration and can be deployed in any serv
 ---
 
 ##Commands
-####User commands
+####Public commands
 
 * **!request \<YouTube URL or video ID\>**: Places the requested song into the queue.
 * **!np**: Displays the current song.
@@ -34,7 +34,7 @@ It requires very little and simple configuration and can be deployed in any serv
 `addpermission and removepermission should only be used for exceptional circumstances since they are not the preferred way to set command permissions. Please read below.`
  
 ####Regarding command permissions
-By default, any user can use any of the user commands and only users with server role 'Admin' can execute admin commands.
+By default, any user can use any of the public commands and only users with server role 'Admin' can execute admin commands.
 
 It is highly likely that you need to further customise these permissions, since the administrative role name in your server may not be called 'Admin' or because you just want to change these permissions in any way. This can be achieved through the **!addpermission** and **!removepermission** commands, but they have some drawbacks: they can't be used with any role name that contains spaces, permissions set through these commands are not saved and will be lost on a bot restart, and also without any further setup you will not be even able to use them if you don't have 'Admin' role.
 
