@@ -57,7 +57,7 @@ After you have installed everything required by *discord.js*, you can install th
 
 If you're using Linux, just run the above command and everything should work fine.
 
-###2. Setting up Discord account
+###2. Setting up a Discord account
 
 You will need a Discord account to be used as the music bot. You can use an existing one or create a new one for this purpose. If you decide to create a new account to serve as the bot, you will need to register it with an email and a password.
 
