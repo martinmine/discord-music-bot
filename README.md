@@ -115,7 +115,68 @@ In the following example, we will set permissions so that users with role *Boss*
 ```js
 var myBot = require('discord-music-bot');
 
-setCommandPermissions(");
+myBot.setCommandPermissions("stop", "Boss", "DJ");
+myBot.setCommandPermissions("resume", "Boss", "DJ");
+myBot.setCommandPermissions("skip", "Boss", "DJ");
+myBot.setCommandPermissions("setnp", "Boss");
+myBot.setCommandPermissions("clearqueue", "Boss");
+myBot.setCommandPermissions("setqueuelimit", "Boss");
+myBot.setCommandPermissions("addpermission", "Boss");
+myBot.setCommandPermissions("removepermission", "Boss");
 
 myBot.run("agu@be.lu", "SuperStrongPassword", "Cool Discord Server", "Music", "general");
 ```
+
+We have overrided the default permission list of those commands: *stop*, *resume* and *skip* can be executed by both *Boss* and *DJ*, and the remaining commands can only be executed by *Boss*. We didn't override the rest of the commands, so they are still public.
+
+
+
+But we can make it much shorter:
+
+```js
+var myBot = require('discord-music-bot');
+
+myBot.setDefaultAdminRole("Boss");
+myBot.setCommandPermissions("stop", "Boss", "DJ");
+myBot.setCommandPermissions("resume", "Boss", "DJ");
+myBot.setCommandPermissions("skip", "Boss", "DJ");
+
+myBot.run("agu@be.lu", "SuperStrongPassword", "Cool Discord Server", "Music", "general");
+```
+
+All administrative commands are to be run by role *Boss* instead of *Admin*. Also, *stop*, *resume* and *skip* are available to both *Boss* and *DJ*
+
+You can also use string arrays as parameters:
+
+```js
+var myBot = require('discord-music-bot');
+
+myBot.setDefaultAdminRole("Boss");
+myBot.setCommandPermissions("stop", ["Boss", "DJ"]);
+myBot.setCommandPermissions("resume", ["Boss", "DJ"]);
+myBot.setCommandPermissions("skip", ["Boss", "DJ"]);
+
+myBot.run("agu@be.lu", "SuperStrongPassword", "Cool Discord Server", "Music", "general");
+```
+
+If a command has an empty permission list, then it can be run by anyone. It becomes a public command.
+
+```js
+var myBot = require('discord-music-bot');
+
+myBot.setCommandPermissions("skip", []);
+
+myBot.run("agu@be.lu", "SuperStrongPassword", "Cool Discord Server", "Music", "general");
+```
+
+This code runs a bot with default permissions, but command *skip* can be executed by anyone.
+
+
+
+Let's end with a more complicated example. Consider the following permissions:
+
+* Role *Friends* is requested to use command *!request*
+* Role *Boss* can run all commands
+* Role *M
+
+
