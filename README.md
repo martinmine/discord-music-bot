@@ -41,3 +41,7 @@ It is highly likely that you need to further customise these permissions, since 
 These issues will be fixed on future updates.
 
 TODO explains how to properly setup command permissions.
+
+#Setup
+
+dfgsagsagfasg
