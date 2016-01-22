@@ -62,3 +62,60 @@ If you're using Linux, just run the above command and everything should work fin
 You will need a Discord account to be used as the music bot. You can use an existing one or create a new one for this purpose. If you decide to create a new account to serve as the bot, you will need to register it with an email and a password.
 
 In any case, the account you decide to use **must already be a member of the server** you'll use the bot in. If it isn't, just get an invitation and manually join the server.
+
+###3. Setting up the bot
+####Simplest configuration
+Ok, since everything is ready, you can now set up your bot! In this example, let's assume you have a server role called 'Admin' and you're fine with the default permission system.
+
+Let's create a .js file called *whatever*.js with the following content:
+```js
+var myBot = require('discord-music-bot');
+myBot.run("account email", "account password", "Server name", "Voice channel name", "Text channel name");
+```
+
+For example, if the credentials of my bot account are *agu@be.lu* / *SuperStrongPassword*, my server is called *Cool Discord Server*, I want the bot to join voice channel *Music* and to listen to text channel *#general* for commands:
+
+```js
+var myBot = require('discord-music-bot');
+bot.run("agu@be.lu", "SuperStrongPassword", "Cool Discord Server", "Music", "general");
+```
+
+Note that you don't need to include the *#* in the text channel name.
+
+
+
+And that's it! To run your bot, open a command prompt and type:
+
+`node /path/to/my/file/whatever.js`
+
+Your bot should now have joined your server in the desired voice channel. You can now start typing commands in chat!
+
+---
+
+####Changing admin role name
+
+If you think the default permissions are fine but your administrative role name in the server is called, say, *Boss* instead of *Admin*, then there is a very simple way to fix that without having to change permissions for every command:
+
+```js
+var myBot = require('discord-music-bot');
+myBot.setDefaultAdminRole("Boss");
+myBot.run("agu@be.lu", "SuperStrongPassword", "Cool Discord Server", "Music", "general");
+```
+
+Now every user with role *Boss* will be able to execute administrative commands.
+
+---
+
+####Setting individual permissions for each command
+
+Of course, you can customise permissions further than just changing the *Admin* role name.
+
+In the following example, we will set permissions so that users with role *Boss* can execute all administrative commands, but users with role *DJ* can also use *!stop*, *!resume* and *!skip* in addition to the regular public commands.
+
+```js
+var myBot = require('discord-music-bot');
+
+setCommandPermissions(");
+
+myBot.run("agu@be.lu", "SuperStrongPassword", "Cool Discord Server", "Music", "general");
+```
