@@ -36,12 +36,23 @@ It requires very little and simple configuration and can be deployed in any serv
 ####Regarding command permissions
 By default, any user can use any of the public commands and only users with server role 'Admin' can execute admin commands.
 
-It is highly likely that you need to further customise these permissions, since the administrative role name in your server may not be called 'Admin' or because you just want to change these permissions in any way. This can be achieved through the **!addpermission** and **!removepermission** commands, but they have some drawbacks: they can't be used with any role name that contains spaces, permissions set through these commands are not saved and will be lost on a bot restart, and also without any further setup you will not be even able to use them if you don't have 'Admin' role.
+It is highly likely that you need to further customise these permissions, since the administrative role name in your server may not be called 'Admin' or because you just want to change these permissions in any way. This can be achieved through the **!addpermission** and **!removepermission** commands, but they have some drawbacks: they can't be used with any role name that contains spaces, permissions set through these commands are not persisted and will be lost on a bot restart, and also without any further setup you will not be even able to use them if you don't have 'Admin' role.
 
 These issues will be fixed on future updates.
 
 TODO explains how to properly setup command permissions.
 
+
+
 #Setup
 
-dfgsagsagfasg
+###1. Installing Node.js and discord-bot-music module
+You can download Node.js [here](https://nodejs.org/en/). You'll need version 0.12 or latest.
+
+After Node.js has been successfully installed, you'll need to install discord-music-bot module. If you're using Windows, please see [discord.js' documentation](https://discordjs.readthedocs.org/en/latest/installing.html) regarding some aditional software you'll need to install for the *discord.js* library to work properly, which is used by the bot.
+
+After you have installed everything required by *discord.js*, you can install the *discord-music-bot* module just by opening a command prompt and typing:
+
+`npm install discord-music-bot`
+
+If you're using Linux, just run the above command and everything should work fine.
