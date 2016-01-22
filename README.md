@@ -31,7 +31,7 @@ It requires very little and simple configuration and can be deployed in any serv
 * **!addpermission \<command name\> \<role name\>**: Allows a role to execute a certain command.
 * **!removepermission \<command name\> \<role name\>**: Revokes a role's permission to execute a certain command.
 
-`addpermission and removepermission should only be used for exceptional circumstances since they are not the preferred way to set command permissions. Please see TODO`
+`addpermission and removepermission should only be used for exceptional circumstances since they are not the preferred way to set command permissions. Please read below.`
  
 ####Regarding command permissions
 By default, any user can use any of the user commands and only users with server role 'Admin' can execute admin commands.
