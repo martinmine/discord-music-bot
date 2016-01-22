@@ -30,3 +30,12 @@ It requires very little and simple configuration and can be deployed in any serv
 * **!setqueuelimit \<limit\>**: Changes the maximum number of songs the queue can hold. Set to -1 for no limit.
 * **!addpermission \<command name\> \<role name\>**: Allows a role to execute a certain command.
 * **!removepermission \<command name\> \<role name\>**: Revokes a role's permission to execute a certain command.
+
+`addpermission and removepermission should only be used for exceptional circumstances since they are not the preferred way to set command permissions. Please see TODO`
+ 
+####Regarding command permissions
+By default, any user can use any of the user commands and only users with server role 'Admin' can execute admin commands.
+
+It is highly likely that you need to further customise these permissions, since the administrative role name in your server may not be called 'Admin' or because you just want to change these permissions in any way. This can be achieved through the **!addpermission** and **!removepermission** commands, but they have some drawbacks: they can't be used with any role name that contains spaces, permissions set through these commands are not saved and will be lost on a bot restart, and also without any further setup you will not be even able to use them if you don't have 'Admin' role.
+
+TODO explains how to properly setup command permissions.
