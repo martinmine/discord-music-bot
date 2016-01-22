@@ -1,4 +1,6 @@
-# discord-music-bot
+# WORK IN PROGRESS
+
+[![NPM](https://nodei.co/npm/discord-music-bot.png?downloads=true)](https://nodei.co/npm/discord-music-bot/)
 
 ---
 
