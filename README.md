@@ -17,7 +17,7 @@ It requires very little and simple configuration and can be deployed in any serv
 * **!np**: Displays the current song.
 * **!commands**: Displays all available commands.
 * **!queue**: Displays the song queue.
-* **!permissions \<command name\>**: Displays the required role to execute a certan command.
+* **!permissions \<command name\>**: Displays the required role to execute a certain command.
 * **!queuelimit**: Displays the maximum number of songs the queue can hold.
  
 ####Admin commands
