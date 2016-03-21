@@ -1,4 +1,5 @@
 # WORK IN PROGRESS
+sorry i've been busy i'll attend this some day i swear
 
 [![NPM](https://nodei.co/npm/discord-music-bot.png?downloads=true)](https://nodei.co/npm/discord-music-bot/)
 
