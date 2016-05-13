@@ -266,6 +266,7 @@ function addVideoToQueue(videoID, message) {
                 return;
             }
 
+            // TODO: get API for this
             var audioURL = $('#main div.clip table tbody tr th span.fa-music').first().parent().parent().find('td a').attr('href');
 
             queue.push({
@@ -278,7 +279,7 @@ function addVideoToQueue(videoID, message) {
             bot.reply(message, "\"" + videoTitle + "\" has been added to the queue.");
 
         } else {
-            bot.reply(message, "There has been a problem handling your request.");
+            bot.reply(message, "There has been a problem handling your request. (Error:" + error + ")");
             console.log(error);
         }
     });
