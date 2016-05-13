@@ -114,6 +114,8 @@ exports.setDefaultAdminRole = function (roleName) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bot.on('ready', function () {
+    bot.sendMessage(bot.servers.get('name', serverName).channels.get('name', textChannelName), "Ready to take requests!");
+
     var channel = bot.servers.get('name', serverName).channels.get('name', channelName);
     bot.joinVoiceChannel(channel, function (error) {
         console.log(error.message);
@@ -234,10 +236,13 @@ function playNextTrack() {
     nowPlayingTitle = queue[0]['title'];
     nowPlayingUser = queue[0]['user'];
 
+    var videoId = queue[0]['id'];
+
     console.log(getTime() + "NP: \"" + nowPlayingTitle + "\" (by " + nowPlayingUser + ")");
 
     if (np) {
-        bot.sendMessage(bot.servers.get('name', serverName).channels.get('name', textChannelName), "Now Playing: \"" + nowPlayingTitle + "\" (requested by " + queue[0]['mention'] + ")");
+        var msg = "**Now Playing: \"" + nowPlayingTitle + "\" | requested by " + queue[0]['mention'] + " | https://youtu.be/" + videoId + "**";
+        bot.sendMessage(bot.servers.get('name', serverName).channels.get('name', textChannelName), msg);
     }
 
     queue.splice(0, 1);
@@ -262,7 +267,7 @@ function addVideoToQueue(videoID, message) {
             var videoTitle = $('title').text();
 
             if (videoTitle.indexOf('SaveDeo') != -1) {
-                bot.reply(message, "Sorry, I couldn't get audio track for that video.");
+                bot.reply(message, "Sorry, this track can't be played outside of Youtube.");
                 return;
             }
 
@@ -273,11 +278,12 @@ function addVideoToQueue(videoID, message) {
                 title: videoTitle,
                 user: message.author.username,
                 mention: message.author.mention(),
-                url: audioURL
+                url: audioURL,
+                id: videoID
             });
 
-            bot.reply(message, "\"" + videoTitle + "\" has been added to the queue.");
-
+            bot.reply(message, "**[" + videoTitle + "] added to the queue. https://youtu.be/" + videoID + "**");
+            bot.deleteMessage(message);
         } else {
             bot.reply(message, "There has been a problem handling your request. (Error:" + error + ")");
             console.log(error);
