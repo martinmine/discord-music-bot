@@ -19,8 +19,7 @@
 /////////////////////////////////////////////// DEFAULT MESSAGES ///////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-var replyTextToDirectMessages = "I'm agubot! Use !commands on a public chat room to see the command list."; // TODO: Make bot show which channel its in instead (misleading message)
-var replyTextToMentions = "Use !commands to see the command list.";
+// TODO: Make responses configurable (i18n?)
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -140,13 +139,15 @@ bot.on("message", function (message) {
                     handleCommand(message, message.content.substring(1));
 
                 } else if (message.isMentioned(myID)) { //Bot mentioned in message
-                    bot.reply(message, replyTextToMentions);
+                    bot.reply(message, "Use !commands to see the command list.");
+                } else {
+                    bot.reply(message, "You're typing in a music-only chat. Type !commands to see what I can do.")
                 }
             }
 
         } else { // Direct Message
             console.log('User ' + message.author.username + ' said -> ' + message.content);
-            bot.reply(message, replyTextToDirectMessages);
+            bot.reply(message, "I'm agubot! Use !commands in #" + channelName + " see the command list.");
         }
     }
 });
@@ -241,7 +242,7 @@ function playNextTrack() {
     console.log(getTime() + "NP: \"" + nowPlayingTitle + "\" (by " + nowPlayingUser + ")");
 
     if (np) {
-        var msg = "**Now Playing: \"" + nowPlayingTitle + "\" | requested by " + queue[0]['mention'] + " | https://youtu.be/" + videoId + "**";
+        var msg = "**Playing [" + nowPlayingTitle + "] | requested by " + queue[0]['mention'] + " | https://youtu.be/" + videoId + "**";
         bot.sendMessage(bot.servers.get('name', serverName).channels.get('name', textChannelName), msg);
     }
 
