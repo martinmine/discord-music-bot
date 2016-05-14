@@ -261,7 +261,7 @@ var commands = [
             if (isNaN(newVolume) || newVolume < -1) {
                 context.bot.reply(message, "Please, provide a valid number");
             } else {
-                context.bot.voiceConnection.playArbitraryFFmpeg(null);
+                context.bot.voiceConnection.setVolume(newVolume);
                 context.bot.reply(message, "Volume set to " + newVolume);
             }
         }
