@@ -250,6 +250,24 @@ var commands = [
     },
 
     {
+        command: "volume",
+        aliases: ["setvolume"],
+        description: "Sets the output volume of the bot",
+        parameters: [],
+        permissions: ["admin"],
+        execute: function (message, params, context) {
+            var newVolume = parseFloat(params[1]);
+
+            if (isNaN(newVolume) || newVolume < -1) {
+                context.bot.reply(message, "Please, provide a valid number");
+            } else {
+                context.bot.voiceConnection.playArbitraryFFmpeg(null);
+                context.bot.reply(message, "Volume set to " + newVolume);
+            }
+        }
+    },
+    
+    {
         command: "setqueuelimit",
         aliases: [],
         description: "Changes the queue limit. Set to -1 for no limit.",
