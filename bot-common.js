@@ -217,7 +217,7 @@ function getSongQueue(message) {
         response = "the queue is empty.";
     } else {
         for (var i = 0; i < queue.length; i++) {
-            response += "\"" + queue[i]['title'] + "\" (requested by " + queue[i]['user'] + ")\n";
+            response += "\"" + queue[i]['title'] + "\" (requested by @" + queue[i]['user'] + ")\n";
         }
     }
 
@@ -242,7 +242,7 @@ function playNextTrack() {
     console.log(getTime() + "NP: \"" + nowPlayingTitle + "\" (by " + nowPlayingUser + ")");
 
     if (np) {
-        var msg = "**Playing [" + nowPlayingTitle + "] | requested by " + queue[0]['mention'] + " | https://youtu.be/" + videoId + "**";
+        var msg = "**Playing [" + nowPlayingTitle + "] by " + queue[0]['mention'] + " | https://youtu.be/" + videoId + "**";
         bot.sendMessage(bot.servers.get('name', serverName).channels.get('name', textChannelName), msg);
     }
 
@@ -251,7 +251,7 @@ function playNextTrack() {
 
 function getNowPlaying() {
     if (bot.voiceConnection.playing) {
-        return "\"" + nowPlayingTitle + "\" (requested by " + nowPlayingUser + ")";
+        return "\"" + nowPlayingTitle + "\" (requested by @" + nowPlayingUser + ")";
     } else {
         return "Nothing!";
     }
