@@ -9,6 +9,7 @@ var util = require('./util.js');
 var commands = [
     {
         command: "stop",
+        aliases: [],
         description: "Stops playlist (will also skip current song!)",
         parameters: [],
         permissions: ['admin'],
@@ -21,6 +22,7 @@ var commands = [
 
     {
         command: "resume",
+        aliases: [],
         description: "Resumes playlist",
         parameters: [],
         permissions: ['admin'],
@@ -32,6 +34,7 @@ var commands = [
 
     {
         command: "request",
+        aliases: ["play"],
         description: "Adds the requested video to the playlist queue",
         parameters: ["YouTube URL or video ID"],
         permissions: [],
@@ -47,6 +50,7 @@ var commands = [
 
     {
         command: "np",
+        aliases: ["currentsong", "nowplaying", "songname", "song"],
         description: "Displays the current song",
         parameters: [],
         permissions: [],
@@ -57,6 +61,7 @@ var commands = [
 
     {
         command: "commands",
+        aliases: ["help"],
         description: "Displays this message, duh!",
         parameters: [],
         permissions: [],
@@ -66,6 +71,10 @@ var commands = [
             for (var i = 0; i < commands.length; i++) {
                 var c = commands[i];
                 response += "\n!" + c.command;
+
+                for (var k = 0; k < c.aliases.length; k++) {
+                    response += "/" + c.aliases[k];
+                }
 
                 for (var j = 0; j < c.parameters.length; j++) {
                     response += " <" + c.parameters[j] + ">";
@@ -80,6 +89,7 @@ var commands = [
 
     {
         command: "setnp",
+        aliases: [],
         description: "Sets whether the bot will announce the current song or not",
         parameters: ["on/off"],
         permissions: ['admin'],
@@ -101,6 +111,7 @@ var commands = [
 
     {
         command: "skip",
+        aliases: ["next", "nextsong"],
         description: "Skips the current song",
         parameters: [],
         permissions: ['admin'],
@@ -111,6 +122,7 @@ var commands = [
 
     {
         command: "queue",
+        aliases: ["songlist"],
         description: "Displays the queue",
         parameters: [],
         permissions: [],
@@ -121,6 +133,7 @@ var commands = [
 
     {
         command: "clearqueue",
+        aliases: [],
         description: "Removes all songs from the queue",
         parameters: [],
         permissions: ['admin'],
@@ -131,6 +144,7 @@ var commands = [
 
     {
         command: "permissions",
+        aliases: [],
         description: "Checks the required role to use a command",
         parameters: ["command name"],
         permissions: [],
@@ -163,6 +177,7 @@ var commands = [
 
     {
         command: "addpermission",
+        aliases: [],
         description: "Allows a role to execute a certain command",
         parameters: ["command name", "role name"],
         permissions: ['admin'],
@@ -189,6 +204,7 @@ var commands = [
 
     {
         command: "removepermission",
+        aliases: [],
         description: "Revokes a role's permission to execute a certain command",
         parameters: ["command name", "role name"],
         permissions: ['admin'],
@@ -219,6 +235,7 @@ var commands = [
 
     {
         command: "queuelimit",
+        aliases: [],
         description: "Displays the current queue limit",
         parameters: [],
         permissions: [],
@@ -234,6 +251,7 @@ var commands = [
 
     {
         command: "setqueuelimit",
+        aliases: [],
         description: "Changes the queue limit. Set to -1 for no limit.",
         parameters: ['limit'],
         permissions: ['admin'],
@@ -255,9 +273,10 @@ var commands = [
 ];
 
 function searchCommand(command) {
+    var commandName = command.toLowerCase();
 
     for (var i = 0; i < commands.length; i++) {
-        if (commands[i].command == command.toLowerCase()) {
+        if (commands[i].command == commandName || util.inArray(commandName, commands[i].aliases)) {
             return commands[i];
         }
     }
