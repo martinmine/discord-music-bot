@@ -113,7 +113,7 @@ exports.setDefaultAdminRole = function (roleName) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bot.on('ready', function () {
-    bot.sendMessage(bot.servers.get('name', serverName).channels.get('name', textChannelName), "Ready to take requests!");
+    sendMessageToChat("Ready to take requests!");
 
     var channel = bot.servers.get('name', serverName).channels.get('name', channelName);
     bot.joinVoiceChannel(channel, function (error) {
@@ -227,12 +227,22 @@ function getSongQueue(message) {
 function playNextTrack() {
 
     if (queueEmpty()) {
-        bot.sendMessage(bot.servers.get('name', serverName).channels.get('name', textChannelName), "Queue is empty!");
+        sendMessageToChat("Queue is empty!");
         bot.voiceConnection.stopPlaying();
         return;
     }
 
-    bot.voiceConnection.playFile(queue[0]['url']);
+    bot.voiceConnection.playFile(queue[0]['url'], false, function(e, intent) {
+        if (e != null) {
+            sendMessageToChat("There was a problem playing this song, skipping to next");
+            console.log('Error while playing song', e);
+            playNextTrack();
+        } else {
+            intent.on('end', function() {
+                playNextTrack();
+            });
+        }
+    });
 
     nowPlayingTitle = queue[0]['title'];
     nowPlayingUser = queue[0]['user'];
@@ -242,8 +252,7 @@ function playNextTrack() {
     console.log(getTime() + "NP: \"" + nowPlayingTitle + "\" (by " + nowPlayingUser + ")");
 
     if (np) {
-        var msg = "**Playing [" + nowPlayingTitle + "] by " + queue[0]['mention'] + " | https://youtu.be/" + videoId + "**";
-        bot.sendMessage(bot.servers.get('name', serverName).channels.get('name', textChannelName), msg);
+        sendMessageToChat("**Playing [" + nowPlayingTitle + "] by " + queue[0]['mention'] + " | https://youtu.be/" + videoId + "**");
     }
 
     queue.splice(0, 1);
@@ -290,6 +299,10 @@ function addVideoToQueue(videoID, message) {
             console.log(error);
         }
     });
+}
+
+function sendMessageToChat(message) {
+    bot.sendMessage(bot.servers.get('name', serverName).channels.get('name', textChannelName), message);
 }
 
 function getVideoId(string) {
