@@ -276,7 +276,7 @@ function searchCommand(command) {
     var commandName = command.toLowerCase();
 
     for (var i = 0; i < commands.length; i++) {
-        if (commands[i].command == commandName || util.inArray(commandName, commands[i].aliases)) {
+        if (commands[i].command == commandName || util.containsElement(commandName, commands[i].aliases)) {
             return commands[i];
         }
     }
