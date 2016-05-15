@@ -60,6 +60,17 @@ var commands = [
     },
 
     {
+        command: "ping",
+        aliases: [],
+        description: "Removes your message to indicate a pong",
+        parameters: [],
+        permissions: [],
+        execute: function (message, params, context) {
+            context.bot.deleteMessage(message);
+        }
+    },
+
+    {
         command: "commands",
         aliases: ["help"],
         description: "Displays this message, duh!",
