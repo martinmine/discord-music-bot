@@ -30,8 +30,7 @@ var myID, serverName, channelName, textChannelName;
 var stopped = false;
 var np = true;
 
-var nowPlayingTitle = "";
-var nowPlayingUser = "";
+var currentSong;
 
 var queue = [];
 
@@ -242,8 +241,7 @@ function playNextTrack() {
         }
     });
 
-    nowPlayingTitle = nextTrack.title;
-    nowPlayingUser = nextTrack.mention;
+    currentSong = nextTrack;
 
     console.log(getTime() + "NP: \"" + nextTrack.title + "\" (by " + nextTrack.user + ")");
 
@@ -256,7 +254,7 @@ function playNextTrack() {
 
 function getNowPlaying() {
     if (bot.voiceConnection.playing) {
-        return "now playing " + nowPlayingTitle + " | `" + nowPlayingTitle.duration + "` | requested by " + nowPlayingUser + "";
+        return "now playing " + currentSong.title + " | `" + currentSong.duration + "` | requested by " + currentSong.mention + "";
     } else {
         if (queueEmpty()) {
             return "nothing, queue empty";
