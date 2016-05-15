@@ -113,6 +113,7 @@ exports.setDefaultAdminRole = function (roleName) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bot.on('ready', function () {
+    console.log('Bot ready!');
     sendMessageToChat("Ready to take requests!");
 
     var channel = bot.servers.get('name', serverName).channels.get('name', channelName);
@@ -232,27 +233,20 @@ function playNextTrack() {
         return;
     }
 
-    bot.voiceConnection.playFile(queue[0]['url'], false, function(e, intent) {
+    var nextTrack = queue[0];
+
+    bot.voiceConnection.playFile(nextTrack.fileName, false, function(e) {
         if (e != null) {
             sendMessageToChat("There was a problem playing this song, skipping to next");
             console.log('Error while playing song', e);
             playNextTrack();
-        } else {
-            intent.on('end', function() {
-                playNextTrack();
-            });
         }
     });
 
-    nowPlayingTitle = queue[0]['title'];
-    nowPlayingUser = queue[0]['user'];
-
-    var videoId = queue[0]['id'];
-
-    console.log(getTime() + "NP: \"" + nowPlayingTitle + "\" (by " + nowPlayingUser + ")");
+    console.log(getTime() + "NP: \"" + nextTrack.title + "\" (by " + nextTrack.user + ")");
 
     if (np) {
-        sendMessageToChat("**Playing [" + nowPlayingTitle + "] by " + queue[0]['mention'] + " | https://youtu.be/" + videoId + "**");
+        sendMessageToChat("**Playing [" + nextTrack.title + "] (" + nextTrack.duration + ") by " + nextTrack.mention + " | https://youtu.be/" + nextTrack.id + "**");
     }
 
     queue.splice(0, 1);
@@ -267,37 +261,34 @@ function getNowPlaying() {
 }
 
 function addVideoToQueue(videoID, message) {
+    var fs = require('fs');
+    var youtubedl = require('youtube-dl');
+    console.log('Starting downloading', videoID);
+    var video = youtubedl('http://www.youtube.com/watch?v=' + videoID,
+        ['--extract-audio', '-f bestaudio'],
+        { cwd: __dirname });
 
-    var baseURL = "https://savedeo.com/download?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D";
+    video.on('info', function(info) {
+        video.pipe(fs.createWriteStream(info._filename));
 
-    request(baseURL + videoID, function (error, response, body) {
-
-        if (!error && response.statusCode == 200) {
-            var cheerio = require('cheerio'), $ = cheerio.load(body);
-            var videoTitle = $('title').text();
-
-            if (videoTitle.indexOf('SaveDeo') != -1) {
-                bot.reply(message, "Sorry, this track can't be played outside of Youtube.");
-                return;
-            }
-
-            // TODO: get API for this
-            var audioURL = $('#main div.clip table tbody tr th span.fa-music').first().parent().parent().find('td a').attr('href');
-
+        video.on('end', function() {
             queue.push({
-                title: videoTitle,
+                title: info.title,
                 user: message.author.username,
                 mention: message.author.mention(),
-                url: audioURL,
+                fileName: info._filename,
+                duration: info.duration,
                 id: videoID
             });
 
-            bot.reply(message, "**[" + videoTitle + "] added to the queue. https://youtu.be/" + videoID + "**");
+            bot.reply(message, "**[" + info.title + "] (" + info.duration + ") added to the queue. https://youtu.be/" + videoID + "**");
             bot.deleteMessage(message);
-        } else {
-            bot.reply(message, "There has been a problem handling your request. (Error:" + error + ")");
-            console.log(error);
-        }
+        });
+    });
+
+    video.on('error', function(error) {
+        bot.reply(message, "There has been a problem handling your request. (Error:" + error + ")");
+        console.log('Error while downloading yt video', error);
     });
 }
 
