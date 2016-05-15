@@ -14,7 +14,7 @@ var commands = [
         parameters: [],
         permissions: ['admin'],
         execute: function (message, params, context) {
-            context.bot.reply(message, "Stopping!");
+            context.bot.reply(message, "stopping");
             context.bot.voiceConnection.stopPlaying();
             context.stopped = true;
         }
@@ -27,7 +27,7 @@ var commands = [
         parameters: [],
         permissions: ['admin'],
         execute: function (message, params, context) {
-            context.bot.reply(message, "Resuming playlist!");
+            context.bot.reply(message, "resuming playlist");
             context.stopped = false;
         }
     },
@@ -40,7 +40,7 @@ var commands = [
         permissions: [],
         execute: function (message, params, context) {
             if (queueLimit != -1 && context.queue.length >= queueLimit) {
-                context.bot.reply(message, "Queue is full!");
+                context.bot.reply(message, "queue is full, request rejected!");
                 return;
             }
             var videoID = context.getVideoId(params[1]);
@@ -55,7 +55,7 @@ var commands = [
         parameters: [],
         permissions: [],
         execute: function (message, params, context) {
-            context.bot.reply(message, "Now Playing: " + context.getNowPlaying());
+            context.bot.reply(message, context.getNowPlaying());
         }
     },
 
@@ -66,7 +66,7 @@ var commands = [
         parameters: [],
         permissions: [],
         execute: function (message, params, context) {
-            var response = "Available commands:";
+            var response = "available commands:";
 
             for (var i = 0; i < commands.length; i++) {
                 var c = commands[i];
@@ -96,13 +96,13 @@ var commands = [
         execute: function (message, params, context) {
             var response;
             if (params[1].toLowerCase() == "on") {
-                response = "Will announce song names in chat";
+                response = "will announce song names in chat";
                 context.np = true;
             } else if (params[1].toLowerCase() == "off") {
-                response = "Will no longer announce song names in chat";
+                response = "will no longer announce song names in chat";
                 context.np = false;
             } else {
-                response = "Sorry?";
+                response = "sorry? Please use only either `on` or `off` as parameter for this command";
             }
 
             context.bot.reply(message, response);
@@ -154,7 +154,7 @@ var commands = [
             var response;
 
             if (command) {
-                response = "Roles that can use command \"" + params[1] + "\": ";
+                response = "roles that can use command \"" + params[1] + "\": ";
                 var permissions = command.permissions;
                 if (permissions.length == 0) {
                     response += "(any role)";
@@ -168,7 +168,7 @@ var commands = [
                     }
                 }
             } else {
-                response = "Unknown command: \"" + params[1] + "\"";
+                response = "unknown command: \"" + params[1] + "\"";
             }
 
             context.bot.reply(message, response);
@@ -186,19 +186,19 @@ var commands = [
             var command = searchCommand(params[1]);
 
             if (!command) {
-                context.bot.reply(message, "Unknown command: \"" + params[1] + "\"");
+                context.bot.reply(message, "unknown command: \"" + params[1] + "\"");
                 return;
             }
 
             var pos = util.inArray(params[2].toLowerCase(), command.permissions);
 
             if (pos !== false) {
-                context.bot.reply(message, "That role can already execute that command");
+                context.bot.reply(message, "that role can already execute that command");
                 return;
             }
 
             command.permissions.push(params[2].toLowerCase());
-            context.bot.reply(message, "Users with role " + params[2] + " can now execute command " + params[1]);
+            context.bot.reply(message, "users with role " + params[2] + " can now execute command " + params[1]);
         }
     },
 
@@ -213,22 +213,22 @@ var commands = [
             var command = searchCommand(params[1]);
 
             if (!command) {
-                context.bot.reply(message, "Unknown command: \"" + params[1] + "\"");
+                context.bot.reply(message, "unknown command: \"" + params[1] + "\"");
                 return;
             }
 
             var pos = util.inArray(params[2].toLowerCase(), command.permissions);
 
             if (pos === false) {
-                context.bot.reply(message, "That role cannot already execute that command");
+                context.bot.reply(message, "that role cannot already execute that command");
                 return;
             }
 
             command.permissions.splice(pos, 1);
-            context.bot.reply(message, "Users with role " + params[2] + " can no longer execute command " + params[1]);
+            context.bot.reply(message, "users with role " + params[2] + " can no longer execute command " + params[1]);
 
             if (command.permissions.length == 0) {
-                context.bot.reply(message, "Command " + params[1] + " can now be executed by anyone.");
+                context.bot.reply(message, "command " + params[1] + " can now be executed by anyone.");
             }
         }
     },
@@ -241,9 +241,9 @@ var commands = [
         permissions: [],
         execute: function (message, params, context) {
             if (queueLimit != -1) {
-                context.bot.reply(message, "Current queue limit is set to " + queueLimit + " songs.");
+                context.bot.reply(message, "crrent queue limit is set to " + queueLimit + " songs.");
             } else {
-                context.bot.reply(message, "There is no queue limit currently.");
+                context.bot.reply(message, "there is no queue limit currently.");
             }
 
         }
@@ -259,10 +259,10 @@ var commands = [
             var newVolume = parseFloat(params[1]);
 
             if (isNaN(newVolume) || newVolume < -1) {
-                context.bot.reply(message, "Please, provide a valid number");
+                context.bot.reply(message, "please, provide a valid number");
             } else {
                 context.bot.voiceConnection.setVolume(newVolume);
-                context.bot.reply(message, "Volume set to " + newVolume);
+                context.bot.reply(message, "volume set to " + newVolume);
             }
         }
     },
@@ -278,10 +278,10 @@ var commands = [
             var response;
 
             if (isNaN(newLimit) || newLimit < -1) {
-                response = "Please, provide a valid number";
+                response = "please, provide a valid number";
             } else {
                 queueLimit = newLimit;
-                response = (newLimit == -1) ? "Queue limit removed" : "New queue limit set to " + newLimit + " songs";
+                response = (newLimit == -1) ? "queue limit removed" : "new queue limit set to " + newLimit + " songs";
             }
 
             context.bot.reply(message, response);

@@ -140,9 +140,9 @@ bot.on("message", function (message) {
                     handleCommand(message, message.content.substring(1));
 
                 } else if (message.isMentioned(myID)) { //Bot mentioned in message
-                    bot.reply(message, "Use !commands to see the command list.");
+                    bot.reply(message, "omg, hi! Use !commands to see my command list.");
                 } else {
-                    bot.reply(message, "You're typing in a music-only chat. Type !commands to see what I can do.")
+                    bot.reply(message, "you're typing in a music-only chat. Type !commands to see what I can do.")
                 }
             }
 
@@ -161,20 +161,19 @@ function handleCommand(message, command) {
 
     if (com) {
         if (!hasPermission(message.author, com)) {
-            bot.reply(message, "Sorry, you don't have permission to use that command.");
+            bot.reply(message, "sorry, you don't have permission to use that command.");
         } else if (params.length - 1 < com.parameters.length) {
-            bot.reply(message, "Insufficient parameters!");
+            bot.reply(message, "insufficient parameters!");
         } else {
             com.execute(message, params, botFacade);
         }
     } else {
-        bot.reply(message, "Unknown command: \"" + params[0] + "\"");
+        bot.reply(message, "unknown command: \"" + params[0] + "\"");
     }
 }
 
 //Queue handler
 var checkQueue = function () {
-
     if (!stopped && !queueEmpty() && !bot.voiceConnection.playing) {
         playNextTrack();
     }
@@ -187,7 +186,6 @@ var checkQueue = function () {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function hasPermission(user, command) {
-
     var permissions = command.permissions;
 
     if (permissions.length == 0) {
@@ -207,7 +205,7 @@ function hasPermission(user, command) {
 
 function clearQueue(message) {
     queue = [];
-    bot.reply(message, "Queue has been cleared!");
+    bot.reply(message, "queue has been cleared!");
 }
 
 function getSongQueue(message) {
@@ -218,7 +216,8 @@ function getSongQueue(message) {
         response = "the queue is empty.";
     } else {
         for (var i = 0; i < queue.length; i++) {
-            response += "\"" + queue[i]['title'] + "\" (requested by @" + queue[i]['user'] + ")\n";
+            var video = queue[i];
+            response += video.title + " | `" + video.duration +  "` | requested by " + video.mention + "\n";
         }
     }
 
@@ -237,7 +236,7 @@ function playNextTrack() {
 
     bot.voiceConnection.playFile(nextTrack.fileName, false, function(e) {
         if (e != null) {
-            sendMessageToChat("There was a problem playing this song, skipping to next");
+            sendMessageToChat("There was a problem playing this song (" + nextTrack.title + "), skipping to next");
             console.log('Error while playing song', e);
             playNextTrack();
         }
@@ -246,7 +245,7 @@ function playNextTrack() {
     console.log(getTime() + "NP: \"" + nextTrack.title + "\" (by " + nextTrack.user + ")");
 
     if (np) {
-        sendMessageToChat("**Playing [" + nextTrack.title + "] (" + nextTrack.duration + ") by " + nextTrack.mention + " | https://youtu.be/" + nextTrack.id + "**");
+        sendMessageToChat("**" + nextTrack.title + " | `" + nextTrack.duration + "` | by " + nextTrack.mention + " | https://youtu.be/" + nextTrack.id + "**");
     }
 
     queue.splice(0, 1);
@@ -254,41 +253,49 @@ function playNextTrack() {
 
 function getNowPlaying() {
     if (bot.voiceConnection.playing) {
-        return "\"" + nowPlayingTitle + "\" (requested by @" + nowPlayingUser + ")";
+        return "now playing " + nowPlayingTitle + " | `" + nowPlayingTitle.duration + "` | requested by " + nowPlayingUser + "";
     } else {
-        return "Nothing!";
+        if (queueEmpty()) {
+            return "nothing, queue empty";
+        } else {
+            return "waiting for next song";
+        }
     }
 }
 
 function addVideoToQueue(videoID, message) {
-    var fs = require('fs');
-    var youtubedl = require('youtube-dl');
-    console.log('Starting downloading', videoID);
-    var video = youtubedl('http://www.youtube.com/watch?v=' + videoID,
-        ['--extract-audio', '-f bestaudio'],
-        { cwd: __dirname });
+    bot.reply(message, '**grabbing track info for `' + videoID + '`**', function(error, sentInfoMessage) {
+        bot.deleteMessage(message);
+        
+        var fs = require('fs');
+        var youtubedl = require('youtube-dl');
+        console.log('Starting downloading', videoID);
+        var video = youtubedl('http://www.youtube.com/watch?v=' + videoID,
+            ['--extract-audio', '-f bestaudio'],
+            { cwd: __dirname });
 
-    video.on('info', function(info) {
-        video.pipe(fs.createWriteStream(info._filename));
+        video.on('info', function(info) {
+            video.pipe(fs.createWriteStream(info._filename));
 
-        video.on('end', function() {
-            queue.push({
-                title: info.title,
-                user: message.author.username,
-                mention: message.author.mention(),
-                fileName: info._filename,
-                duration: info.duration,
-                id: videoID
+            video.on('end', function() {
+                queue.push({
+                    title: info.title,
+                    user: message.author.username,
+                    mention: message.author.mention(),
+                    fileName: info._filename,
+                    duration: info.duration,
+                    id: videoID
+                });
+
+                bot.deleteMessage(sentInfoMessage);
+                bot.reply(message, "**queued " + info.title + " | `" + info.duration + "` | https://youtu.be/" + videoID + "**");
             });
-
-            bot.reply(message, "**[" + info.title + "] (" + info.duration + ") added to the queue. https://youtu.be/" + videoID + "**");
-            bot.deleteMessage(message);
         });
-    });
 
-    video.on('error', function(error) {
-        bot.reply(message, "There has been a problem handling your request. (Error:" + error + ")");
-        console.log('Error while downloading yt video', error);
+        video.on('error', function(error) {
+            bot.reply(message, "unable to queue song, make sure its is a valid Youtube URL or contact a server admin.");
+            console.log('Error while downloading yt video', error);
+        });
     });
 }
 
