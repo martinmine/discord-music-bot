@@ -242,6 +242,9 @@ function playNextTrack() {
         }
     });
 
+    nowPlayingTitle = nextTrack.title;
+    nowPlayingUser = nextTrack.mention;
+
     console.log(getTime() + "NP: \"" + nextTrack.title + "\" (by " + nextTrack.user + ")");
 
     if (np) {
