@@ -267,13 +267,19 @@ var commands = [
         parameters: [],
         permissions: ["admin"],
         execute: function (message, params, context) {
-            var newVolume = parseFloat(params[1]);
+            var currentVolume = context.bot.voiceConnection.getVolume();
 
-            if (isNaN(newVolume) || newVolume < -1) {
-                context.bot.reply(message, "please, provide a valid number");
+            if (params.length == 0) {
+                context.bot.reply(message, 'current volume is ' + currentVolume);
             } else {
-                context.bot.voiceConnection.setVolume(newVolume);
-                context.bot.reply(message, "volume set to " + newVolume);
+                var newVolume = parseFloat(params[1]);
+
+                if (isNaN(newVolume) || newVolume < -1) {
+                    context.bot.reply(message, "please, provide a valid number");
+                } else {
+                    context.bot.voiceConnection.setVolume(newVolume);
+                    context.bot.reply(message, "volume set from " + currentVolume + " to " + newVolume);
+                }
             }
         }
     },
