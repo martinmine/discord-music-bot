@@ -137,7 +137,7 @@ bot.on("message", function (message) {
 
                 var youtubeRegex = new RegExp('^(https?\:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$');
                 if (youtubeRegex.test(message.content)) {
-                    requestSong(message);
+                    requestSong(message, message.content);
                 } else if (message.content[0] == '!') { // Command issued
                     handleCommand(message, message.content.substring(1));
                 } else if (message.isMentioned(myID)) { //Bot mentioned in message
@@ -349,12 +349,12 @@ function getTime() {
     return "[" + f(date.getHours()) + ":" + f(date.getMinutes()) + ":" + f(date.getSeconds()) + "] ";
 }
 
-function requestSong(message) {
+function requestSong(message, url) {
     if (commands.getQueueLimit() != -1 && queue.length >= commands.getQueueLimit()) {
         bot.reply(message, "queue is full, request rejected!");
         return;
     }
 
-    var videoID = getVideoId(params[1]);
+    var videoID = getVideoId(url);
     addVideoToQueue(videoID, message);
 }

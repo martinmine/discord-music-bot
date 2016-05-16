@@ -41,7 +41,7 @@ var commands = [
         parameters: ["YouTube URL or video ID"],
         permissions: [],
         execute: function (message, params, context) {
-            context.requestSong(message);
+            context.requestSong(message, params[1]);
         }
     },
 
@@ -278,7 +278,7 @@ var commands = [
         execute: function (message, params, context) {
             var currentVolume = context.bot.voiceConnection.getVolume();
 
-            if (params.length == 0) {
+            if (params.length == 1) {
                 context.bot.reply(message, 'current volume is ' + currentVolume);
             } else {
                 var newVolume = parseFloat(params[1]);
