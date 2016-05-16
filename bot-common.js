@@ -140,8 +140,6 @@ bot.on("message", function (message) {
 
                 } else if (message.isMentioned(myID)) { //Bot mentioned in message
                     bot.reply(message, "omg, hi! Use !commands to see my command list.");
-                } else {
-                    bot.reply(message, "you're typing in a music-only chat. Type !commands to see what I can do.")
                 }
             }
 
@@ -284,12 +282,12 @@ function addVideoToQueue(videoID, message) {
                     user: message.author.username,
                     mention: message.author.mention(),
                     fileName: info._filename,
-                    duration: info.duration,
+                    duration: util.formatTimestamp(info.duration),
                     id: videoID
                 });
 
                 bot.deleteMessage(sentInfoMessage);
-                bot.reply(message, "**queued " + info.title + " | `" + info.duration + "` | https://youtu.be/" + videoID + "**");
+                bot.reply(message, "**queued " + info.title + " | `" + util.formatTimestamp(info.duration) + "` | https://youtu.be/" + videoID + "**");
             });
         });
 
