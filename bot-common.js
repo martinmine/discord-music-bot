@@ -135,9 +135,11 @@ bot.on("message", function (message) {
 
             if (message.channel.name == textChannelName) { //Message sent through the text channel the bot is listening to
 
-                if (message.content[0] == '!') { // Command issued
+                var youtubeRegex = new RegExp('^(https?\:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$');
+                if (youtubeRegex.test(message.content)) {
+                    requestSong(message);
+                } else if (message.content[0] == '!') { // Command issued
                     handleCommand(message, message.content.substring(1));
-
                 } else if (message.isMentioned(myID)) { //Bot mentioned in message
                     bot.reply(message, "omg, hi! Use !commands to see my command list.");
                 }
@@ -345,4 +347,14 @@ function getTime() {
 
     var date = new Date();
     return "[" + f(date.getHours()) + ":" + f(date.getMinutes()) + ":" + f(date.getSeconds()) + "] ";
+}
+
+function requestSong(message) {
+    if (commands.getQueueLimit() != -1 && queue.length >= commands.getQueueLimit()) {
+        bot.reply(message, "queue is full, request rejected!");
+        return;
+    }
+
+    var videoID = getVideoId(params[1]);
+    addVideoToQueue(videoID, message);
 }

@@ -16,6 +16,7 @@ var commands = [
         execute: function (message, params, context) {
             context.bot.reply(message, "stopping");
             context.bot.voiceConnection.stopPlaying();
+            context.bot.deleteMessage(message);
             context.stopped = true;
         }
     },
@@ -28,6 +29,7 @@ var commands = [
         permissions: ['admin'],
         execute: function (message, params, context) {
             context.bot.reply(message, "resuming playlist");
+            context.bot.deleteMessage(message);
             context.stopped = false;
         }
     },
@@ -39,12 +41,7 @@ var commands = [
         parameters: ["YouTube URL or video ID"],
         permissions: [],
         execute: function (message, params, context) {
-            if (queueLimit != -1 && context.queue.length >= queueLimit) {
-                context.bot.reply(message, "queue is full, request rejected!");
-                return;
-            }
-            var videoID = context.getVideoId(params[1]);
-            context.addVideoToQueue(videoID, message);
+            context.requestSong(message);
         }
     },
 
@@ -56,6 +53,7 @@ var commands = [
         permissions: [],
         execute: function (message, params, context) {
             context.bot.reply(message, context.getNowPlaying());
+            context.bot.deleteMessage(message);
         }
     },
 
@@ -95,6 +93,7 @@ var commands = [
             }
 
             context.bot.reply(message, response);
+            context.bot.deleteMessage(message);
         }
     },
 
@@ -117,6 +116,7 @@ var commands = [
             }
 
             context.bot.reply(message, response);
+            context.bot.deleteMessage(message);
         }
     },
 
@@ -127,7 +127,9 @@ var commands = [
         parameters: [],
         permissions: ['admin'],
         execute: function (message, params, context) {
+            context.bot.reply(message, 'skipping current song');
             context.playNextTrack();
+            context.bot.deleteMessage(message);
         }
     },
 
@@ -139,6 +141,7 @@ var commands = [
         permissions: [],
         execute: function (message, params, context) {
             context.getSongQueue(message);
+            context.bot.deleteMessage(message);
         }
     },
 
@@ -150,6 +153,7 @@ var commands = [
         permissions: ['admin'],
         execute: function (message, params, context) {
             context.clearQueue(message);
+            context.bot.deleteMessage(message);
         }
     },
 
@@ -183,6 +187,7 @@ var commands = [
             }
 
             context.bot.reply(message, response);
+            context.bot.deleteMessage(message);
         }
     },
 
@@ -210,6 +215,7 @@ var commands = [
 
             command.permissions.push(params[2].toLowerCase());
             context.bot.reply(message, "users with role " + params[2] + " can now execute command " + params[1]);
+            context.bot.deleteMessage(message);
         }
     },
 
@@ -241,6 +247,8 @@ var commands = [
             if (command.permissions.length == 0) {
                 context.bot.reply(message, "command " + params[1] + " can now be executed by anyone.");
             }
+
+            context.bot.deleteMessage(message);
         }
     },
 
@@ -257,6 +265,7 @@ var commands = [
                 context.bot.reply(message, "there is no queue limit currently.");
             }
 
+            context.bot.deleteMessage(message);
         }
     },
 
@@ -275,12 +284,14 @@ var commands = [
                 var newVolume = parseFloat(params[1]);
 
                 if (isNaN(newVolume) || newVolume < -1) {
-                    context.bot.reply(message, "please, provide a valid number");
+                    context.bot.reply(message, "please, provide a valid number when setting the volume");
                 } else {
                     context.bot.voiceConnection.setVolume(newVolume);
-                    context.bot.reply(message, "volume set from " + currentVolume + " to " + newVolume);
+                    context.bot.reply(message, "volume modified from " + currentVolume + " to " + newVolume);
                 }
             }
+
+            context.bot.deleteMessage(message);
         }
     },
     
@@ -295,13 +306,14 @@ var commands = [
             var response;
 
             if (isNaN(newLimit) || newLimit < -1) {
-                response = "please, provide a valid number";
+                response = "please, provide a valid number when setting a queue limit";
             } else {
                 queueLimit = newLimit;
                 response = (newLimit == -1) ? "queue limit removed" : "new queue limit set to " + newLimit + " songs";
             }
 
             context.bot.reply(message, response);
+            context.bot.deleteMessage(message);
         }
     }
 
@@ -334,5 +346,6 @@ function setAdminRole(roleName) {
 
 var exports = module.exports = {
     searchCommand: searchCommand,
-    setAdminRole: setAdminRole
+    setAdminRole: setAdminRole,
+    getQueueLimit: function() { return queueLimit; }
 };
