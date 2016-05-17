@@ -52,7 +52,8 @@ var botFacade = {
     np: np,
     playNextTrack: playNextTrack,
     getSongQueue: getSongQueue,
-    clearQueue: clearQueue
+    clearQueue: clearQueue,
+    requestSong: requestSong
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
