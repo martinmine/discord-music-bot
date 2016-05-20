@@ -35,6 +35,17 @@ var commands = [
     },
 
     {
+        command: "request",
+        aliases: ["play"],
+        description: "Adds the requested video to the playlist queue",
+        parameters: ["YouTube URL or video ID"],
+        permissions: [],
+        execute: function (message, params, context) {
+            context.requestSong(message, params[1]);
+        }
+    },
+
+    {
         command: "np",
         aliases: ["currentsong", "nowplaying", "songname", "song"],
         description: "Displays the current song",
