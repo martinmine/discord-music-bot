@@ -136,8 +136,7 @@ bot.on("message", function (message) {
 
             if (message.channel.name == textChannelName) { //Message sent through the text channel the bot is listening to
 
-                var youtubeRegex = new RegExp('^(https?\:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$');
-                if (youtubeRegex.test(message.content)) {
+                if (validURL(message.content)) {
                     requestSong(message, message.content);
                 } else if (message.content[0] == '!') { // Command issued
                     handleCommand(message, message.content.substring(1));
@@ -152,6 +151,15 @@ bot.on("message", function (message) {
         }
     }
 });
+
+function validURL(str) {
+    var regex = /(http|https):\/\/(\w+:{0,1}\w*)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%!\-\/]))?/;
+    if(!regex.test(str)) {
+        return false;
+    } else {
+        return true;
+    }
+}
 
 //Command handler
 function handleCommand(message, command) {
@@ -247,7 +255,7 @@ function playNextTrack() {
     console.log(getTime() + "NP: \"" + nextTrack.title + "\" (by " + nextTrack.user + ")");
 
     if (np) {
-        sendMessageToChat("**" + nextTrack.title + " | `" + nextTrack.duration + "` | by " + nextTrack.mention + " | https://youtu.be/" + nextTrack.id + "**");
+        sendMessageToChat("**" + nextTrack.title + " | `" + nextTrack.duration + "` | by " + nextTrack.mention + " | " + nextTrack.id + "**");
     }
 
     queue.splice(0, 1);
@@ -265,14 +273,14 @@ function getNowPlaying() {
     }
 }
 
-function addVideoToQueue(videoID, message) {
-    bot.reply(message, '**grabbing track info for `' + videoID + '`**', function(error, sentInfoMessage) {
+function addVideoToQueue(url, message) {
+    bot.reply(message, '**grabbing track info for `' + url + '`**', function(error, sentInfoMessage) {
         bot.deleteMessage(message);
         
         var fs = require('fs');
         var youtubedl = require('youtube-dl');
-        console.log('Starting downloading', videoID);
-        var video = youtubedl('http://www.youtube.com/watch?v=' + videoID,
+        console.log('Starting downloading', url);
+        var video = youtubedl(url,
             ['--extract-audio', '-f bestaudio'],
             { cwd: __dirname });
 
@@ -286,17 +294,17 @@ function addVideoToQueue(videoID, message) {
                     mention: message.author.mention(),
                     fileName: info._filename,
                     duration: util.formatTimestamp(info.duration),
-                    id: videoID
+                    id: url
                 });
 
                 bot.deleteMessage(sentInfoMessage);
-                bot.reply(message, "**queued " + info.title + " | `" + util.formatTimestamp(info.duration) + "` | https://youtu.be/" + videoID + "**");
+                bot.reply(message, "**queued " + info.title + " | `" + util.formatTimestamp(info.duration) + "` | " + url + "**");
             });
         });
 
         video.on('error', function(error) {
-            bot.reply(message, "unable to queue song, make sure its is a valid Youtube URL or contact a server admin.");
-            console.log('Error while downloading yt video', error);
+            bot.reply(message, "unable to queue song, make sure its is a valid supported URL or contact a server admin.");
+            console.log('Error while downloading video', error);
         });
     });
 }
@@ -305,37 +313,6 @@ function sendMessageToChat(message) {
     bot.sendMessage(bot.servers.get('name', serverName).channels.get('name', textChannelName), message);
 }
 
-function getVideoId(string) {
-    var searchToken = "?v=";
-    var i = string.indexOf(searchToken);
-
-    if (i == -1) {
-        searchToken = "&v=";
-        i = string.indexOf(searchToken);
-    }
-
-    if (i == -1) {
-        searchToken = "youtu.be/";
-        i = string.indexOf(searchToken);
-    }
-
-    if (i != -1) {
-        var substr = string.substring(i + searchToken.length);
-        var j = substr.indexOf("&");
-
-        if (j == -1) {
-            j = substr.indexOf("?");
-        }
-
-        if (j == -1) {
-            return substr;
-        } else {
-            return substr.substring(0, j);
-        }
-    }
-
-    return string;
-}
 
 function queueEmpty() {
     return queue.length === 0;
@@ -356,6 +333,5 @@ function requestSong(message, url) {
         return;
     }
 
-    var videoID = getVideoId(url);
-    addVideoToQueue(videoID, message);
+    addVideoToQueue(url, message);
 }
