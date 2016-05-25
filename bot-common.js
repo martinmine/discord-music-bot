@@ -45,7 +45,6 @@ var util = require('./util.js');
 var botFacade = {
     bot: bot,
     stopped : stopped,
-    getVideoId: getVideoId,
     addVideoToQueue: addVideoToQueue,
     queue: queue,
     getNowPlaying: getNowPlaying,
