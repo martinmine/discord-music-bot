@@ -14,9 +14,10 @@ var commands = [
         parameters: [],
         permissions: ['admin'],
         execute: function (message, params, context) {
-            context.bot.reply(message, "stopping");
-            context.bot.voiceConnection.stopPlaying();
-            context.bot.deleteMessage(message);
+            message.reply("stopping");
+            context.clearQueue(message);
+            context.playNextTrack();
+            message.delete();
             context.stopped = true;
         }
     },
@@ -28,8 +29,8 @@ var commands = [
         parameters: [],
         permissions: ['admin'],
         execute: function (message, params, context) {
-            context.bot.reply(message, "resuming playlist");
-            context.bot.deleteMessage(message);
+            message.reply("resuming playlist");
+            message.delete();
             context.stopped = false;
         }
     },
@@ -41,8 +42,8 @@ var commands = [
         parameters: [],
         permissions: [],
         execute: function (message, params, context) {
-            context.bot.reply(message, context.getNowPlaying());
-            context.bot.deleteMessage(message);
+            message.reply(context.getNowPlaying());
+            message.delete();
         }
     },
 
@@ -53,7 +54,7 @@ var commands = [
         parameters: [],
         permissions: [],
         execute: function (message, params, context) {
-            context.bot.deleteMessage(message);
+            message.delete();
         }
     },
 
@@ -81,8 +82,8 @@ var commands = [
                 response += ": " + c.description;
             }
 
-            context.bot.reply(message, response);
-            context.bot.deleteMessage(message);
+            message.reply(response);
+            message.delete();
         }
     },
 
@@ -104,8 +105,8 @@ var commands = [
                 response = "sorry? Please use only either `on` or `off` as parameter for this command";
             }
 
-            context.bot.reply(message, response);
-            context.bot.deleteMessage(message);
+            message.reply(response);
+            message.delete();
         }
     },
 
@@ -116,9 +117,9 @@ var commands = [
         parameters: [],
         permissions: ['admin'],
         execute: function (message, params, context) {
-            context.bot.reply(message, 'skipping current song');
+            message.reply('skipping current song');
             context.playNextTrack();
-            context.bot.deleteMessage(message);
+            message.delete();
         }
     },
 
@@ -130,7 +131,7 @@ var commands = [
         permissions: [],
         execute: function (message, params, context) {
             context.getSongQueue(message);
-            context.bot.deleteMessage(message);
+            message.delete();
         }
     },
 
@@ -142,7 +143,7 @@ var commands = [
         permissions: ['admin'],
         execute: function (message, params, context) {
             context.clearQueue(message);
-            context.bot.deleteMessage(message);
+            message.delete();
         }
     },
 
@@ -175,8 +176,8 @@ var commands = [
                 response = "unknown command: \"" + params[1] + "\"";
             }
 
-            context.bot.reply(message, response);
-            context.bot.deleteMessage(message);
+            message.reply(response);
+            message.delete();
         }
     },
 
@@ -191,20 +192,20 @@ var commands = [
             var command = searchCommand(params[1]);
 
             if (!command) {
-                context.bot.reply(message, "unknown command: \"" + params[1] + "\"");
+                message.reply("unknown command: \"" + params[1] + "\"");
                 return;
             }
 
             var pos = util.inArray(params[2].toLowerCase(), command.permissions);
 
             if (pos !== false) {
-                context.bot.reply(message, "that role can already execute that command");
+                message.reply("that role can already execute that command");
                 return;
             }
 
             command.permissions.push(params[2].toLowerCase());
-            context.bot.reply(message, "users with role " + params[2] + " can now execute command " + params[1]);
-            context.bot.deleteMessage(message);
+            message.reply("users with role " + params[2] + " can now execute command " + params[1]);
+            message.delete();
         }
     },
 
@@ -219,25 +220,25 @@ var commands = [
             var command = searchCommand(params[1]);
 
             if (!command) {
-                context.bot.reply(message, "unknown command: \"" + params[1] + "\"");
+                message.reply("unknown command: \"" + params[1] + "\"");
                 return;
             }
 
             var pos = util.inArray(params[2].toLowerCase(), command.permissions);
 
             if (pos === false) {
-                context.bot.reply(message, "that role cannot already execute that command");
+                message.reply("that role cannot already execute that command");
                 return;
             }
 
             command.permissions.splice(pos, 1);
-            context.bot.reply(message, "users with role " + params[2] + " can no longer execute command " + params[1]);
+            message.reply("users with role " + params[2] + " can no longer execute command " + params[1]);
 
             if (command.permissions.length == 0) {
-                context.bot.reply(message, "command " + params[1] + " can now be executed by anyone.");
+                message.reply("command " + params[1] + " can now be executed by anyone.");
             }
 
-            context.bot.deleteMessage(message);
+            message.delete();
         }
     },
 
@@ -249,12 +250,12 @@ var commands = [
         permissions: [],
         execute: function (message, params, context) {
             if (queueLimit != -1) {
-                context.bot.reply(message, "crrent queue limit is set to " + queueLimit + " songs.");
+                message.reply("crrent queue limit is set to " + queueLimit + " songs.");
             } else {
-                context.bot.reply(message, "there is no queue limit currently.");
+                message.reply("there is no queue limit currently.");
             }
 
-            context.bot.deleteMessage(message);
+            message.delete();
         }
     },
 
@@ -265,22 +266,27 @@ var commands = [
         parameters: [],
         permissions: ["admin"],
         execute: function (message, params, context) {
-            var currentVolume = context.bot.voiceConnection.getVolume();
+            var currentVolume = context.getVolume();
+
+            if (currentVolume == -1) {
+                message.reply('no song to set volume on');
+                return;
+            }
 
             if (params.length == 1) {
-                context.bot.reply(message, 'current volume is ' + currentVolume);
+                message.reply('current volume is ' + currentVolume);
             } else {
                 var newVolume = parseFloat(params[1]);
 
                 if (isNaN(newVolume) || newVolume < -1) {
-                    context.bot.reply(message, "please, provide a valid number when setting the volume");
+                    message.reply("please, provide a valid number when setting the volume");
                 } else {
-                    context.bot.voiceConnection.setVolume(newVolume);
-                    context.bot.reply(message, "volume modified from " + currentVolume + " to " + newVolume);
+                    context.setVolume(newVolume);
+                    message.reply("volume modified from " + currentVolume + " to " + newVolume);
                 }
             }
 
-            context.bot.deleteMessage(message);
+            message.delete();
         }
     },
     
@@ -301,8 +307,8 @@ var commands = [
                 response = (newLimit == -1) ? "queue limit removed" : "new queue limit set to " + newLimit + " songs";
             }
 
-            context.bot.reply(message, response);
-            context.bot.deleteMessage(message);
+            message.reply(response);
+            message.delete();
         }
     }
 

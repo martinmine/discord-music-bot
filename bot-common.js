@@ -40,6 +40,9 @@ var Discord = require("discord.js");
 var bot = new Discord.Client();
 var commands = require('./commands.js');
 var util = require('./util.js');
+var voiceConnection;
+var nowPlaying = false;
+var currentSongStream;
 
 // TODO: Remove this after more refactoring
 var botFacade = {
@@ -52,8 +55,24 @@ var botFacade = {
     playNextTrack: playNextTrack,
     getSongQueue: getSongQueue,
     clearQueue: clearQueue,
-    requestSong: requestSong
+    requestSong: requestSong,
+    getVolume: getVolume,
+    setVolume: setVolume
 };
+
+function getVolume() {
+    if (currentSongStream != null) {
+        return currentSongStream.volume;
+    } else {
+        return -1;
+    }
+}
+
+function setVolume(volume) {
+    if (currentSongStream != null) {
+        currentSongStream.setVolume(volume);
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////// EXPORTED METHODS ///////////////////////////////////////////////
@@ -115,12 +134,12 @@ bot.on('ready', function () {
     console.log('Bot ready!');
     sendMessageToChat("Ready to take requests!");
 
-    var channel = bot.servers.get('name', serverName).channels.get('name', channelName);
-    bot.joinVoiceChannel(channel, function (error) {
-        console.log(error.message);
+    var channel = bot.guilds.find('name', serverName).channels.find('name', channelName);
+    channel.join().then(connection => {
+        voiceConnection = connection;
     });
 
-    var mentionText = bot.user.mention();
+    var mentionText = bot.user.toString();
     myID = mentionText.substring(2, mentionText.length - 1);
     checkQueue();
 });
@@ -140,13 +159,13 @@ bot.on("message", function (message) {
                 } else if (message.content[0] == '!') { // Command issued
                     handleCommand(message, message.content.substring(1));
                 } else if (message.isMentioned(myID)) { //Bot mentioned in message
-                    bot.reply(message, "omg, hi! Use !commands to see my command list.");
+                    message.reply("omg, hi! Use !commands to see my command list.");
                 }
             }
 
         } else { // Direct Message
             console.log('User ' + message.author.username + ' said -> ' + message.content);
-            bot.reply(message, "I'm agubot! Use !commands in #" + channelName + " see the command list.");
+            message.reply("I'm agubot! Use !commands in #" + channelName + " see the command list.");
         }
     }
 });
@@ -168,20 +187,20 @@ function handleCommand(message, command) {
 
     if (com) {
         if (!hasPermission(message.author, com)) {
-            bot.reply(message, "sorry, you don't have permission to use that command.");
+            message.reply("sorry, you don't have permission to use that command.");
         } else if (params.length - 1 < com.parameters.length) {
-            bot.reply(message, "insufficient parameters!");
+            message.reply("insufficient parameters!");
         } else {
             com.execute(message, params, botFacade);
         }
     } else {
-        bot.reply(message, "unknown command: \"" + params[0] + "\"");
+        message.reply("unknown command: \"" + params[0] + "\"");
     }
 }
 
 //Queue handler
 var checkQueue = function () {
-    if (!stopped && !queueEmpty() && !bot.voiceConnection.playing) {
+    if (!stopped && !queueEmpty() && !nowPlaying) {
         playNextTrack();
     }
 
@@ -199,7 +218,7 @@ function hasPermission(user, command) {
         return true;
     }
 
-    var userRoles = bot.servers.get('name', serverName).rolesOfUser(user);
+    var userRoles = bot.guilds.find('name', serverName).members.find('user', user).roles.array();
 
     for (var i = 0; i < userRoles.length; i++) {
         if (util.inArray(userRoles[i].name.toLowerCase(), permissions) !== false) {
@@ -212,7 +231,7 @@ function hasPermission(user, command) {
 
 function clearQueue(message) {
     queue = [];
-    bot.reply(message, "queue has been cleared!");
+    message.reply("queue has been cleared!");
 }
 
 function getSongQueue(message) {
@@ -228,29 +247,41 @@ function getSongQueue(message) {
         }
     }
 
-    bot.reply(message, response);
+    message.reply(response);
 }
 
 function playNextTrack() {
 
     if (queueEmpty()) {
         sendMessageToChat("Queue is empty!");
-        bot.voiceConnection.stopPlaying();
+        if (currentSongStream != null) {
+            currentSongStream.end();
+        }
         return;
     }
 
     var nextTrack = queue[0];
 
-    bot.voiceConnection.playFile(nextTrack.fileName, false, function(e) {
+    nowPlaying = true;
+
+    currentSongStream = voiceConnection.playFile(nextTrack.fileName);
+
+    currentSongStream.on('end', () => {
+        console.log('song done');
+        nowPlaying = false;
+        currentSongStream = null;
+    });
+    currentSongStream.on('error', (err) => {
         if (e != null) {
             sendMessageToChat("There was a problem playing this song (" + nextTrack.title + "), skipping to next");
             console.log('Error while playing song', e);
             playNextTrack();
         }
+
+        currentSongStream = null;
     });
 
     currentSong = nextTrack;
-
     console.log(getTime() + "NP: \"" + nextTrack.title + "\" (by " + nextTrack.user + ")");
 
     if (np) {
@@ -261,7 +292,7 @@ function playNextTrack() {
 }
 
 function getNowPlaying() {
-    if (bot.voiceConnection.playing) {
+    if (nowPlaying) {
         return "now playing " + currentSong.title + " | `" + currentSong.duration + "` | requested by " + currentSong.mention + "";
     } else {
         if (queueEmpty()) {
@@ -273,45 +304,47 @@ function getNowPlaying() {
 }
 
 function addVideoToQueue(url, message) {
-    bot.reply(message, '**grabbing track info for `' + url + '`**', function(error, sentInfoMessage) {
-        bot.deleteMessage(message);
-        
-        var fs = require('fs');
-        var youtubedl = require('youtube-dl');
-        console.log('Starting downloading', url);
-        var video = youtubedl(url,
-            ['--extract-audio', '-f bestaudio'],
-            { cwd: __dirname });
+    message.reply('**grabbing track info for `' + url + '`**')
+        .then(sentInfoMessage => {
+            message.delete();
 
-        video.on('info', function(info) {
-            video.pipe(fs.createWriteStream(info._filename));
+            var fs = require('fs');
+            var youtubedl = require('youtube-dl');
+            console.log('Starting downloading', url);
+            var video = youtubedl(url,
+                ['--extract-audio', '-f bestaudio'],
+                { cwd: __dirname });
 
-            video.on('end', function() {
-                queue.push({
-                    title: info.title,
-                    user: message.author.username,
-                    mention: message.author.mention(),
-                    fileName: info._filename,
-                    duration: util.formatTimestamp(info.duration),
-                    id: url
+            video.on('info', function(info) {
+                video.pipe(fs.createWriteStream(info._filename));
+
+                video.on('end', function() {
+                    queue.push({
+                        title: info.title,
+                        user: message.author.username,
+                        mention: message.author.toString(),
+                        fileName: info._filename,
+                        duration: util.formatTimestamp(info.duration),
+                        id: url
+                    });
+
+                    sentInfoMessage.delete();
+                    message.reply("**queued " + info.title + " | `" + util.formatTimestamp(info.duration) + "` | " + url + "**");
                 });
+            });
 
-                bot.deleteMessage(sentInfoMessage);
-                bot.reply(message, "**queued " + info.title + " | `" + util.formatTimestamp(info.duration) + "` | " + url + "**");
+            video.on('error', function(error) {
+                message.reply("unable to queue song, make sure its is a valid supported URL or contact a server admin.");
+                console.log('Error while downloading video', error);
             });
         });
-
-        video.on('error', function(error) {
-            bot.reply(message, "unable to queue song, make sure its is a valid supported URL or contact a server admin.");
-            console.log('Error while downloading video', error);
-        });
-    });
 }
 
 function sendMessageToChat(message) {
-    bot.sendMessage(bot.servers.get('name', serverName).channels.get('name', textChannelName), message);
+    var guild = bot.guilds.find('name', serverName);
+    var channel = guild.channels.find('name', textChannelName);
+    channel.sendMessage(message);
 }
-
 
 function queueEmpty() {
     return queue.length === 0;
@@ -328,7 +361,7 @@ function getTime() {
 
 function requestSong(message, url) {
     if (commands.getQueueLimit() != -1 && queue.length >= commands.getQueueLimit()) {
-        bot.reply(message, "queue is full, request rejected!");
+        message.reply("queue is full, request rejected!");
         return;
     }
 
