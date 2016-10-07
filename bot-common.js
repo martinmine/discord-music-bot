@@ -83,7 +83,11 @@ exports.run = function (email, password, server, channel, textChannel) {
     channelName = channel;
     textChannelName = textChannel;
 
-    bot.login(email, password);
+    bot.login(email, password)
+        .catch(function (e) {
+            console.log(e);
+            console.log('Unable to sign in, invalid username/password or client not allowed to sign in in this area (check your email)');
+        });
 };
 
 exports.setCommandPermissions = function (commandName, arg1) {
@@ -168,6 +172,10 @@ bot.on("message", function (message) {
             message.reply("I'm agubot! Use !commands in #" + channelName + " see the command list.");
         }
     }
+});
+
+bot.on('disconnect', function() {
+    console.log('bot disconnected');
 });
 
 function validURL(str) {
