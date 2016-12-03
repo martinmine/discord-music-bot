@@ -2,9 +2,10 @@
   "name": "discord-music-bot",
   "version": "1.0.0",
   "description": "Simple music bot for Discord servers.",
-  "main": "bot-common.js",
+  "main": "bot.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node bot.js"
   },
   "repository": {
     "type": "git",
